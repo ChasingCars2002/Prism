@@ -16,6 +16,8 @@ export default async function AppLayout({
   if (!user) redirect("/login");
 
   const sidebar = await loadSidebarData();
+  if (sidebar.orgs.length === 0) redirect("/onboarding");
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name, avatar_url")

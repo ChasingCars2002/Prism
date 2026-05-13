@@ -1,5 +1,7 @@
 import { Sidebar } from "@/components/app-shell/sidebar";
 import { TopBar } from "@/components/app-shell/top-bar";
+import { CommandPalette } from "@/components/command-palette/command-palette";
+import { NewProjectDialog } from "@/components/projects/new-project-dialog";
 import type { SidebarData } from "@/lib/sidebar-data";
 
 export interface AppShellUser {
@@ -25,6 +27,8 @@ export function AppShell({
         <TopBar user={user} />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
+      <CommandPalette data={sidebar} />
+      <NewProjectDialog data={sidebar} />
     </div>
   );
 }

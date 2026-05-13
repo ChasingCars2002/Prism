@@ -16,6 +16,8 @@ import {
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { OrgSwitcher } from "@/components/app-shell/org-switcher";
+import { useUIStore } from "@/lib/stores/ui-store";
+import { useNewProjectDialogStore } from "@/components/projects/new-project-dialog";
 import type {
   SidebarData,
   SidebarDepartment,
@@ -30,6 +32,7 @@ export function Sidebar({ data }: { data: SidebarData }) {
     () => data.orgs.find((o) => o.id === activeOrgId) ?? data.orgs[0] ?? null,
     [data.orgs, activeOrgId]
   );
+  const openPalette = useUIStore((s) => s.setPaletteOpen);
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col border-r border-border bg-muted/30">
@@ -43,7 +46,16 @@ export function Sidebar({ data }: { data: SidebarData }) {
         <SidebarLink href="/app" icon={Sparkles} label="Home" />
         <SidebarLink href="/app/inbox" icon={Inbox} label="Inbox" />
         <SidebarLink href="/app/my-tasks" icon={Folder} label="My tasks" />
-        <SidebarLink href="/app/search" icon={Search} label="Search" shortcut="⌘K" />
+        <button
+          onClick={() => openPalette(true)}
+          className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
+        >
+          <Search className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
+          <span className="flex-1 text-left">Search</span>
+          <kbd className="rounded border border-border bg-background px-1.5 text-[10px] font-medium text-muted-foreground">
+            ⌘K
+          </kbd>
+        </button>
       </nav>
 
       <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -113,8 +125,21 @@ function OrgTree({ org }: { org: SidebarOrg }) {
         </div>
       ) : null}
 
-      <NewItemButton label="Add department" />
+      <NewProjectTrigger />
     </div>
+  );
+}
+
+function NewProjectTrigger() {
+  const openNewProject = useNewProjectDialogStore((s) => s.open);
+  return (
+    <button
+      onClick={openNewProject}
+      className="mt-2 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+    >
+      <Plus className="h-3.5 w-3.5" />
+      New project
+    </button>
   );
 }
 
@@ -199,11 +224,3 @@ function ProjectNode({ project }: { project: SidebarProject }) {
   );
 }
 
-function NewItemButton({ label }: { label: string }) {
-  return (
-    <button className="mt-2 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-      <Plus className="h-3.5 w-3.5" />
-      {label}
-    </button>
-  );
-}

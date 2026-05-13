@@ -19,7 +19,7 @@ export default async function AppDashboardPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/app/onboarding">
+          <Link href="/onboarding">
             <Plus className="mr-2 h-4 w-4" />
             Create your organization
           </Link>

@@ -8,17 +8,19 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 import { signOutAction } from "@/app/auth/actions";
+import { useUIStore } from "@/lib/stores/ui-store";
 import type { AppShellUser } from "@/components/app-shell/app-shell";
 import { initials } from "@/lib/utils";
 
 export function TopBar({ user }: { user: AppShellUser }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const openPalette = useUIStore((s) => s.setPaletteOpen);
 
   return (
     <header className="flex h-14 items-center gap-3 border-b border-border bg-background px-4">
       <button
+        onClick={() => openPalette(true)}
         className="flex h-9 flex-1 items-center gap-2 rounded-md border border-input bg-muted/40 px-3 text-sm text-muted-foreground transition-colors hover:bg-muted"
-        // Cmd+K palette will be wired up in Phase 2.
       >
         <Search className="h-4 w-4" />
         <span className="flex-1 text-left">

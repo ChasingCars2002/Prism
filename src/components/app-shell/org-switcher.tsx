@@ -65,7 +65,7 @@ export function OrgSwitcher({
           ))}
           <div className="my-1 h-px bg-border" />
           <Link
-            href="/app/onboarding"
+            href="/onboarding"
             className={cn(
               "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
             )}
