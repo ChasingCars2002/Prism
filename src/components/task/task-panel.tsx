@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn, initials } from "@/lib/utils";
 import { useTaskNavigation } from "@/components/task/use-task-navigation";
+import { CommentsThread } from "@/components/task/comments-thread";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   deleteTaskAction,
@@ -51,9 +52,11 @@ interface TaskDetail {
 export function TaskPanel({
   projectId,
   taskId,
+  currentUserId,
 }: {
   projectId: string;
   taskId: string | null;
+  currentUserId: string | null;
 }) {
   const { closeTask } = useTaskNavigation();
   const open = Boolean(taskId);
@@ -62,7 +65,11 @@ export function TaskPanel({
     <Sheet open={open} onOpenChange={(o) => (o ? null : closeTask())}>
       <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-lg">
         {taskId ? (
-          <TaskPanelBody projectId={projectId} taskId={taskId} />
+          <TaskPanelBody
+            projectId={projectId}
+            taskId={taskId}
+            currentUserId={currentUserId}
+          />
         ) : null}
       </SheetContent>
     </Sheet>
@@ -72,9 +79,11 @@ export function TaskPanel({
 function TaskPanelBody({
   projectId,
   taskId,
+  currentUserId,
 }: {
   projectId: string;
   taskId: string;
+  currentUserId: string | null;
 }) {
   const { closeTask } = useTaskNavigation();
   const supabase = createSupabaseBrowserClient();
@@ -243,6 +252,10 @@ function TaskPanelBody({
             placeholder="Add more detail…"
             className="min-h-[160px]"
           />
+        </div>
+
+        <div className="mt-6">
+          <CommentsThread taskId={taskId} currentUserId={currentUserId} />
         </div>
       </div>
 

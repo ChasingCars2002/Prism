@@ -1,8 +1,14 @@
 import { notFound } from "next/navigation";
 import { Globe, Lock, Users } from "lucide-react";
-import { loadBoardData } from "@/lib/board-data";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { loadBoardData, loadProjectAssignees } from "@/lib/board-data";
 import { Board } from "@/components/board/board";
+import { ListView } from "@/components/board/list-view";
+import { TimelineView } from "@/components/board/timeline-view";
 import { TaskPanel } from "@/components/task/task-panel";
+import { FilterBar } from "@/components/project/filter-bar";
+import { ViewSwitcher } from "@/components/project/view-switcher";
+import { parseView } from "@/lib/filters";
 
 const VISIBILITY_LABEL = {
   private: "Private",
@@ -21,12 +27,19 @@ export default async function ProjectPage({
   searchParams,
 }: {
   params: { id: string };
-  searchParams: { task?: string };
+  searchParams: { task?: string; view?: string };
 }) {
+  const supabase = createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const data = await loadBoardData(params.id);
   if (!data) notFound();
 
+  const assignees = await loadProjectAssignees(data.project.teamId);
   const VisIcon = VISIBILITY_ICON[data.project.visibility];
+  const view = parseView(searchParams.view);
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -44,18 +57,30 @@ export default async function ProjectPage({
             </p>
           ) : null}
         </div>
-        <div className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground">
-          <VisIcon className="h-3 w-3" />
-          {VISIBILITY_LABEL[data.project.visibility]}
+        <div className="flex items-center gap-3">
+          <ViewSwitcher />
+          <div className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+            <VisIcon className="h-3 w-3" />
+            {VISIBILITY_LABEL[data.project.visibility]}
+          </div>
         </div>
       </header>
 
-      <Board
-        projectId={data.project.id}
-        initialSections={data.sections}
-      />
+      <FilterBar assignees={assignees} />
 
-      <TaskPanel projectId={data.project.id} taskId={searchParams.task ?? null} />
+      {view === "board" ? (
+        <Board projectId={data.project.id} initialSections={data.sections} />
+      ) : view === "list" ? (
+        <ListView sections={data.sections} />
+      ) : (
+        <TimelineView sections={data.sections} />
+      )}
+
+      <TaskPanel
+        projectId={data.project.id}
+        taskId={searchParams.task ?? null}
+        currentUserId={user?.id ?? null}
+      />
     </div>
   );
 }

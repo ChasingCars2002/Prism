@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   DragDropContext,
   Droppable,
@@ -15,6 +16,7 @@ import { TaskCard } from "@/components/board/task-card";
 import { useTaskNavigation } from "@/components/task/use-task-navigation";
 import { moveTaskAction } from "@/lib/actions/tasks";
 import { createSectionAction } from "@/lib/actions/sections";
+import { matchesFilters, parseFilters } from "@/lib/filters";
 import type { BoardSection, BoardTask } from "@/lib/board-data";
 
 interface BoardProps {
@@ -32,6 +34,8 @@ interface BoardProps {
 export function Board({ projectId, initialSections }: BoardProps) {
   const [sections, setSections] = useState<BoardSection[]>(initialSections);
   const { openTask } = useTaskNavigation();
+  const searchParams = useSearchParams();
+  const filters = useMemo(() => parseFilters(searchParams), [searchParams]);
 
   // Reset local state when the server-provided sections change identity
   // (e.g. after creating a new task on the server and revalidating).
@@ -147,27 +151,33 @@ export function Board({ projectId, initialSections }: BoardProps) {
                       snapshot.isDraggingOver && "bg-accent/40"
                     )}
                   >
-                    {section.tasks.map((task, idx) => (
-                      <Draggable
-                        key={task.id}
-                        draggableId={task.id}
-                        index={idx}
-                      >
-                        {(p, s) => (
-                          <div
-                            ref={p.innerRef}
-                            {...p.draggableProps}
-                            {...p.dragHandleProps}
-                            className={cn(s.isDragging && "rotate-[1deg]")}
-                          >
-                            <TaskCard
-                              task={task}
-                              onClick={() => openTask(task.id)}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
+                    {section.tasks.map((task, idx) => {
+                      const matches = matchesFilters(task, filters);
+                      return (
+                        <Draggable
+                          key={task.id}
+                          draggableId={task.id}
+                          index={idx}
+                        >
+                          {(p, s) => (
+                            <div
+                              ref={p.innerRef}
+                              {...p.draggableProps}
+                              {...p.dragHandleProps}
+                              className={cn(
+                                s.isDragging && "rotate-[1deg]",
+                                !matches && "opacity-30"
+                              )}
+                            >
+                              <TaskCard
+                                task={task}
+                                onClick={() => openTask(task.id)}
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      );
+                    })}
                     {provided.placeholder}
                   </div>
                 )}

@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { OrgSwitcher } from "@/components/app-shell/org-switcher";
+import { InboxBadge } from "@/components/app-shell/inbox-badge";
 import { useUIStore } from "@/lib/stores/ui-store";
 import { useNewProjectDialogStore } from "@/components/projects/new-project-dialog";
 import type {
@@ -44,7 +45,7 @@ export function Sidebar({ data }: { data: SidebarData }) {
 
       <nav className="px-2 py-3">
         <SidebarLink href="/app" icon={Sparkles} label="Home" />
-        <SidebarLink href="/app/inbox" icon={Inbox} label="Inbox" />
+        <SidebarLink href="/app/inbox" icon={Inbox} label="Inbox" badge={<InboxBadge />} />
         <SidebarLink href="/app/my-tasks" icon={Folder} label="My tasks" />
         <button
           onClick={() => openPalette(true)}
@@ -78,11 +79,13 @@ function SidebarLink({
   icon: Icon,
   label,
   shortcut,
+  badge,
 }: {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   shortcut?: string;
+  badge?: React.ReactNode;
 }) {
   return (
     <Link
@@ -91,6 +94,7 @@ function SidebarLink({
     >
       <Icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
       <span className="flex-1">{label}</span>
+      {badge}
       {shortcut ? (
         <kbd className="rounded border border-border bg-background px-1.5 text-[10px] font-medium text-muted-foreground">
           {shortcut}

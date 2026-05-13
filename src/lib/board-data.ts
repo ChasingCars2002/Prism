@@ -141,3 +141,29 @@ export async function loadBoardData(
     sections: sectionList,
   };
 }
+
+export interface ProjectAssignee {
+  id: string;
+  name: string;
+}
+
+export async function loadProjectAssignees(
+  teamId: string
+): Promise<ProjectAssignee[]> {
+  const supabase = createSupabaseServerClient();
+  const { data: members } = await supabase
+    .from("team_members")
+    .select("user_id")
+    .eq("team_id", teamId);
+  const ids = (members ?? []).map((m) => m.user_id);
+  if (ids.length === 0) return [];
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .in("id", ids);
+
+  return ((profiles ?? []) as { id: string; full_name: string | null }[])
+    .map((p) => ({ id: p.id, name: p.full_name ?? "Unnamed" }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
